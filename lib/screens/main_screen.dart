@@ -2,7 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http_demo/data/api/category.api.dart';
+import 'package:http_demo/data/api/product.api.dart';
 import 'package:http_demo/models/category.dart';
+import 'package:http_demo/models/product.dart';
+import 'package:http_demo/widgets/product_list_widget.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -12,6 +15,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   List<Category> categories = List<Category>();
   List<Widget> categoryWidgets = List<Widget>();
+  List<Product> products = List<Product>();
 
   @override
   void initState() {
@@ -37,7 +41,8 @@ class _MainScreenState extends State<MainScreen> {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(children: categoryWidgets),
-            )
+            ),
+            ProductListWidget(products)
           ],
         ),
       ),
@@ -64,7 +69,9 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget getCategoryWidget(Category category) {
     return FlatButton(
-      onPressed: (){},
+      onPressed: (){
+        getProductsByCategoryId(category);
+      },
       child: Text(
         category.categoryName,
         style: TextStyle(color: Colors.blueGrey),
@@ -73,5 +80,14 @@ class _MainScreenState extends State<MainScreen> {
           borderRadius: BorderRadius.circular(15.0),
           side: BorderSide(color: Colors.blue)),
     );
+  }
+
+  void getProductsByCategoryId(Category category) {
+    ProductApi.getProductsByCategoryId(category.id).then((response){
+      setState(() {
+        Iterable list = json.decode(response.body);
+        this.products = list.map((product) => Product.fromJson(product)).toList();
+      });
+    });
   }
 }
